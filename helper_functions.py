@@ -1,3 +1,5 @@
+import numpy as np
+
 def jukes_cantor(reference_sequence: str, distant_sequence: str) -> float:
     """The Jukes-Cantor correction for estimating genetic distances
     calculated with Hamming distance.
@@ -19,7 +21,25 @@ def jukes_cantor(reference_sequence: str, distant_sequence: str) -> float:
         For example 1.163.
 
     """
-    raise NotImplementedError()
+    if len(reference_sequence) != len(distant_sequence):
+        raise ValueError("Sequence must be aligned (equal length).")
+
+    ref = np.array(list(str(reference_sequence).upper()))
+    dist = np.array(list(str(distant_sequence).upper()))
+
+    valid = (ref != "-") & (dist != "-")
+
+    length = int(valid.sum())
+    if length == 0:
+        return 0.0
+
+    p = np.sum(ref[valid] != dist[valid]) / length
+
+    if p >= 0.75:
+        return float("inf")
+
+    d = -0.75 * np.log(1 - (4 / 3) * p)
+    return float(d * length)
 
 
 def kimura_two_parameter(reference_sequence: str, distant_sequence: str) -> float:
